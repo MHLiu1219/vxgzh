@@ -30,9 +30,9 @@ public class User implements Serializable {
     private String uuid;
     @TableField(value = "code",exist = true)
     private String code;
-    @TableField(value = "create_time",exist = true)
-    private Date createTime;
-    @TableField(value = "delete_time",exist = true)
-    private Date deleteTime;
+//    @TableField(value = "create_time",exist = true)
+//    private Date createTime;
+//    @TableField(value = "delete_time",exist = true)
+//    private Date deleteTime;
 
 }
