@@ -8,6 +8,7 @@ import lombok.Data;
 import org.springframework.stereotype.Component;
 
 import java.io.Serializable;
+import java.util.Date;
 
 /**
  * User
@@ -30,8 +31,8 @@ public class User implements Serializable {
     @TableField(value = "code",exist = true)
     private String code;
     @TableField(value = "create_time",exist = true)
-    private String createTime;
+    private Date createTime;
     @TableField(value = "delete_time",exist = true)
-    private String deleteTime;
+    private Date deleteTime;
 
 }
