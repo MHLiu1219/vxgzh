@@ -1,4 +1,4 @@
-package com.vxgzh.maoxiandao.bean;
+package com.vxgzh.maoxiandao.bean.xml;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
@@ -7,7 +7,6 @@ import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElementWrapper;
 import javax.xml.bind.annotation.XmlRootElement;
-import java.util.Date;
 
 /**
  * OutMsgEntity
@@ -56,7 +55,7 @@ public class OutMsgEntity {
         return "<xml>\n" +
                 "  <ToUserName><![CDATA["+ToUserName+"]]></ToUserName>\n" +
                 "  <FromUserName><![CDATA["+FromUserName+"]]></FromUserName>\n" +
-                "  <CreateTime>"+new Date().getTime()+"</CreateTime>\n" +
+                "  <CreateTime>"+System.currentTimeMillis()+"</CreateTime>\n" +
                 "  <MsgType><![CDATA[image]]></MsgType>\n" +
                 "  <Image>\n" +
                 "    <MediaId><![CDATA["+MediaId+"]]></MediaId>\n" +
@@ -72,7 +71,7 @@ public class OutMsgEntity {
         return "<xml>\n" +
                 "  <ToUserName><![CDATA["+ToUserName+"]]></ToUserName>\n" +
                 "  <FromUserName><![CDATA["+FromUserName+"]]></FromUserName>\n" +
-                "  <CreateTime>"+new Date().getTime()+"</CreateTime>\n" +
+                "  <CreateTime>"+System.currentTimeMillis()+"</CreateTime>\n" +
                 "  <MsgType><![CDATA[text]]></MsgType>\n" +
                 "  <Content><![CDATA["+Content+"]]></Content>\n" +
                 "</xml>";

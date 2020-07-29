@@ -1,4 +1,4 @@
-package com.vxgzh.maoxiandao.bean;
+package com.vxgzh.maoxiandao.bean.json;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

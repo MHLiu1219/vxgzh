@@ -1,7 +1,7 @@
 package com.vxgzh.maoxiandao.controller;
 
-import com.vxgzh.maoxiandao.bean.InMsgEntity;
-import com.vxgzh.maoxiandao.bean.OutMsgEntity;
+import com.vxgzh.maoxiandao.bean.xml.InMsgEntity;
+import com.vxgzh.maoxiandao.bean.xml.OutMsgEntity;
 import com.vxgzh.maoxiandao.service.UserService;
 import com.vxgzh.maoxiandao.utils.SignUtil;
 import org.springframework.beans.factory.annotation.Autowired;

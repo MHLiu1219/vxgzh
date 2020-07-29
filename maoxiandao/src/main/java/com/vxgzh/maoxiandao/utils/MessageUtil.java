@@ -1,11 +1,13 @@
 package com.vxgzh.maoxiandao.utils;
 
 import com.google.gson.Gson;
-import com.vxgzh.maoxiandao.bean.Image;
-import com.vxgzh.maoxiandao.bean.ImageMsg;
-import com.vxgzh.maoxiandao.bean.Text;
-import com.vxgzh.maoxiandao.bean.TextMsg;
+import com.vxgzh.maoxiandao.bean.json.Image;
+import com.vxgzh.maoxiandao.bean.json.ImageMsg;
+import com.vxgzh.maoxiandao.bean.json.Text;
+import com.vxgzh.maoxiandao.bean.json.TextMsg;
 import com.vxgzh.maoxiandao.common.VxUrl;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * MessageUtil
@@ -15,6 +17,9 @@ import com.vxgzh.maoxiandao.common.VxUrl;
  * @Description:
  */
 public class MessageUtil {
+
+    private static Logger log = LoggerFactory.getLogger(MessageUtil.class);
+
 
     /**
      * 客服-发送消息
@@ -26,7 +31,7 @@ public class MessageUtil {
         String accessToken = AccessTokenUtil.getAccessToken();
         url = url.replaceAll("ACCESS_TOKEN", accessToken);
         String httpsRequest = HttpUtil.httpsPost(url, json);
-        System.out.println("***httpsRequest>"+httpsRequest);
+        log.info(httpsRequest);
     }
 
     /**
