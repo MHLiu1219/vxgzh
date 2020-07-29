@@ -4,14 +4,14 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 
 /**
- * Image
+ * Text
  *
  * @Author: lmh
- * @CreateTime: 2020-07-24
+ * @CreateTime: 2020-07-26
  * @Description:
  */
 @Data
 @AllArgsConstructor
-public class Image {
-    private String media_id;
+public class Text {
+    private String content;
 }

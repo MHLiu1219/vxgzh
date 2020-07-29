@@ -13,4 +13,7 @@ import lombok.Data;
 public class BaseMessage {
     private String touser;
     private String msgtype;
+    {
+        this.setMsgtype(this.getClass().getDeclaredFields()[0].getName());
+    }
 }

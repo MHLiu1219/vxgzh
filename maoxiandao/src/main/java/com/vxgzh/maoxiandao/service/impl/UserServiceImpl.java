@@ -33,7 +33,7 @@ public class UserServiceImpl implements UserService {
     @Override
     public String uploadTuPian(String key) {
         QueryWrapper<User> wrapper = new QueryWrapper<>();
-        wrapper.eq(key,"uuid");
+        wrapper.eq("uuid",key);
         User user = userMapper.selectOne(wrapper);
         if (user == null ){
             return null;
@@ -50,18 +50,15 @@ public class UserServiceImpl implements UserService {
     @Override
     public String getCodeByuuid(String userKey) {
         QueryWrapper<User> wrapper = new QueryWrapper<>();
-        wrapper.eq(userKey,"uuid");
+        wrapper.eq("uuid",userKey);
         User user = userMapper.selectOne(wrapper);
         String code = user.getCode();
 
         //获取到以后删除
-        user.setCode(null);
+        user.setCode("0000");
         userMapper.updateById(user);
 
-        if (code!=null && code.length()>=0){
-            return code;
-        }
-        return null;
+        return code;
     }
 
     /**
@@ -72,11 +69,12 @@ public class UserServiceImpl implements UserService {
     @Override
     public String addUser(String openId) {
         QueryWrapper<User> wrapper = new QueryWrapper<>();
-        wrapper.eq(openId,"name");
+        wrapper.eq("name",openId);
         User user = userMapper.selectOne(wrapper);
         if (user!= null){
             return user.getUuid();
         }
+        user = new User();
         String s = UUID.randomUUID().toString();
         String uuid = s.replaceAll("\\-", "");
         uuid = uuid.substring(0,10);
@@ -94,11 +92,15 @@ public class UserServiceImpl implements UserService {
     @Override
     public void addCode(String openId, String code) {
         QueryWrapper<User> wrapper = new QueryWrapper<>();
-        wrapper.eq(openId,"name");
+        wrapper.eq("name",openId);
         User user = userMapper.selectOne(wrapper);
         user.setCode(code);
         userMapper.updateById(user);
     }
 
+    @Override
+    public String getUserByUuid(String userKey) {
+        return uploadTuPian(userKey);
+    }
 
 }

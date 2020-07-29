@@ -14,4 +14,11 @@ public interface UserService {
 
     //跟新code
     void addCode(String openId, String code);
+
+    /**
+     * 根据uuid查询用户名
+     * @param userKey
+     * @return
+     */
+    String getUserByUuid(String userKey);
 }

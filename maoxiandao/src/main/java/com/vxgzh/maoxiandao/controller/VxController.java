@@ -21,7 +21,7 @@ public class VxController {
     @Autowired
     UserService userService;
 
-    @GetMapping("maoxiandao")
+    @GetMapping()
     public String verify(String signature,String timestamp,String nonce,String echostr){
         System.out.println("开始验证");
         if (SignUtil.checkSignature(signature,timestamp,nonce)) {
@@ -33,7 +33,7 @@ public class VxController {
     }
 
 
-    @PostMapping("maoxiandao")
+    @PostMapping()
     public String getMessage(@RequestBody InMsgEntity inMsgEntity){
         // 微信账号（openID）
         String openId = inMsgEntity.getFromUserName();
@@ -51,7 +51,7 @@ public class VxController {
             String uuid = userService.addUser(openId);
 
             // 返回成功信息
-            outMsgEntity.setContent("注册成功"+uuid);
+            outMsgEntity.setContent("注册成功，您的密钥为："+uuid);
         }
 
         // 保存验证码
@@ -63,20 +63,14 @@ public class VxController {
             userService.addCode(openId,code);
 
             // 返回成功信息
-            outMsgEntity.setContent("正在验证，");
+            outMsgEntity.setContent("开始验证。。。");
         }
         // 其它不处理
-        outMsgEntity.setContent("注册绑定格式：@密钥\n例如：@jiashuai\n" +
-                "游戏检查验证：#验证码（用wasd表示箭头方向的四个方向）\n例如：#wwad");
+        if (outMsgEntity.getContent() == null) {
+            outMsgEntity.setContent("注册绑定：发送@字符" +
+                    "游戏检查验证：#验证码（用wasd表示箭头方向的四个方向）\n例如：#wwad");
+        }
         return outMsgEntity.getTextXml();
     }
 
-
-    public static void main(String[] args) {
-        String str = "@safaf";
-        String substring = str.substring(0, 1);
-        String substring1 = str.substring(1);
-        System.out.println(substring);
-        System.out.println(substring1);
-    }
 }
