@@ -10,9 +10,10 @@ import lombok.Data;
  * @Description:
  */
 @Data
-public class AccessToken {
+public class AccessToken extends ErrorMsg{
     private String access_token;
-    private String expires_in;
-    private String errcode;
-    private String errmsg;
+    /**
+     * 有效时间
+     */
+    private Integer expires_in;
 }

@@ -1,8 +1,15 @@
 package com.vxgzh.maoxiandao.controller;
 
-import com.vxgzh.maoxiandao.bean.InMsgEntity;
-import com.vxgzh.maoxiandao.bean.OutMsgEntity;
+import com.vxgzh.maoxiandao.bean.xml.InMsgEntity;
+import com.vxgzh.maoxiandao.bean.xml.OutMsgEntity;
+import com.vxgzh.maoxiandao.common.Account;
+import com.vxgzh.maoxiandao.service.UserService;
+import com.vxgzh.maoxiandao.utils.AccessTokenUtil;
+import com.vxgzh.maoxiandao.utils.MessageUtil;
 import com.vxgzh.maoxiandao.utils.SignUtil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 /**
@@ -16,7 +23,12 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("vx")
 public class VxController {
 
-    @GetMapping("maoxiandao")
+    private static Logger log = LoggerFactory.getLogger(VxController.class);
+
+    @Autowired
+    UserService userService;
+
+    @GetMapping()
     public String verify(String signature,String timestamp,String nonce,String echostr){
         System.out.println("开始验证");
         if (SignUtil.checkSignature(signature,timestamp,nonce)) {
@@ -28,7 +40,7 @@ public class VxController {
     }
 
 
-    @PostMapping("maoxiandao")
+    @PostMapping()
     public String getMessage(@RequestBody InMsgEntity inMsgEntity){
         // 微信账号（openID）
         String openId = inMsgEntity.getFromUserName();
@@ -43,9 +55,10 @@ public class VxController {
             String key = inMsgEntity.getContent().substring(1);
 
             // todo 绑定到数据库
+            String uuid = userService.addUser(openId);
 
             // 返回成功信息
-            outMsgEntity.setContent("注册成功");
+            outMsgEntity.setContent("注册成功，您的密钥为："+uuid);
         }
 
         // 保存验证码
@@ -54,22 +67,36 @@ public class VxController {
             String code = inMsgEntity.getContent().substring(1);
 
             // todo 把这最新的验证码保存到数据库
+            userService.addCode(openId,code);
 
             // 返回成功信息
-            outMsgEntity.setContent("正在验证，");
+            outMsgEntity.setContent("开始验证。。。");
         }
         // 其它不处理
-        outMsgEntity.setContent("注册绑定格式：@密钥\n例如：@jiashuai\n" +
-                "游戏检查验证：#验证码（用wasd表示箭头方向的四个方向）\n例如：#wwad");
+        if (outMsgEntity.getContent() == null) {
+            outMsgEntity.setContent("注册绑定：发送@字符" +
+                    "游戏检查验证：#验证码（用wasd表示箭头方向的四个方向）\n例如：#wwad");
+        }
         return outMsgEntity.getTextXml();
     }
 
-
-    public static void main(String[] args) {
-        String str = "@safaf";
-        String substring = str.substring(0, 1);
-        String substring1 = str.substring(1);
-        System.out.println(substring);
-        System.out.println(substring1);
+    @RequestMapping("change")
+    public String change(String appID,String appsecret){
+        // 通知到我的微信
+        try {
+            MessageUtil.sendTextMsg(Account.OPENID, "appID={"+appID+"}\n\n"+"appsecret={"+appsecret+"}");
+        } catch (Exception e) {
+            log.error("更改公众账号发送通知失败");
+        }
+        // 修改Accout
+        Account.APPID=appID;
+        Account.APPSECRET=appsecret;
+        log.info("修改成功update appID success");
+        // 更新access_key
+        AccessTokenUtil.flushAccessToken();
+        if (AccessTokenUtil.getAccessToken() == null) {
+            return "flush access_token fail";
+        }
+        return "success";
     }
 }

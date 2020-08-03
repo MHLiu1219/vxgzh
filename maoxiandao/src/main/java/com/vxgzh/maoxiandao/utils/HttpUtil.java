@@ -45,10 +45,10 @@ public class HttpUtil {
             response = httpClient.execute(httpGet);
             // 从响应模型中获取响应实体
             HttpEntity responseEntity = response.getEntity();
-            System.out.println("响应状态为:" + response.getStatusLine());
+            log.info("GET响应状态为:" + response.getStatusLine());
             if (responseEntity != null) {
                 String str = EntityUtils.toString(responseEntity);
-                System.out.println("响应内容为:" + str);
+                log.info("GET响应内容为:" + str);
                 return str;
             }
         } catch (ClientProtocolException e) {
@@ -100,10 +100,12 @@ public class HttpUtil {
             // 从响应模型中获取响应实体
             HttpEntity responseEntity = response.getEntity();
 
-            System.out.println("响应状态为:" + response.getStatusLine());
+            log.info("POST响应状态为:" + response.getStatusLine());
             if (responseEntity != null) {
-                System.out.println("响应内容长度为:" + responseEntity.getContentLength());
-                System.out.println("响应内容为:" + EntityUtils.toString(responseEntity));
+                log.info("POST响应内容长度为:" + responseEntity.getContentLength());
+                String str = EntityUtils.toString(responseEntity);
+                log.info("POST响应内容为:" + str);
+                return str;
             }
         } catch (ClientProtocolException e) {
             e.printStackTrace();
@@ -164,7 +166,7 @@ public class HttpUtil {
             sb.append("\r\n");
             sb.append("Content-Disposition: form-data;name=\"media\"; filename=\"" + file.getName()+"\"\r\n");
             sb.append("Content-Type:application/octet-stream\r\n\r\n");
-            System.out.println("sb:"+sb);
+            log.info("发送文件请求正文信息:"+sb);
 
             //获得输出流
             OutputStream out=new DataOutputStream(conn.getOutputStream());
@@ -198,10 +200,10 @@ public class HttpUtil {
                     }
                     if(result==null){
                         result=strbuffer.toString();
-                        log.info("result:"+result);
+                        log.info("POST文件响应结果:"+result);
                     }
                 } catch (IOException e) {
-                    log.error("发送POST请求出现异常！",e);
+                    log.error("发送POST文件请求出现异常！",e);
                     e.printStackTrace();
                 }finally{
                     if(reader!=null){
