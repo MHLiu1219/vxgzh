@@ -1,6 +1,7 @@
 package com.vxgzh.maoxiandao.controller;
 
 import com.google.gson.Gson;
+import com.vxgzh.maoxiandao.common.Account;
 import com.vxgzh.maoxiandao.common.VxUrl;
 import com.vxgzh.maoxiandao.service.UserService;
 import com.vxgzh.maoxiandao.utils.HttpUtil;
@@ -57,6 +58,13 @@ public class PicController {
             if (userId==null){
                 return "无法查询到密钥对应的用户";
             }
+        }
+
+        Integer count = Account.access.get(key);
+        if (null != count) {
+            String code = userService.imageSegt(file);
+            Account.access.put(key,count + 1);
+            userService.addCode(userId,code);
         }
 
         // 上传到微信公众号
@@ -143,6 +151,23 @@ public class PicController {
         String collect = userService.imageSegt(file);
         return collect;
     }
+
+    @RequestMapping("access")
+    public String access(String key){
+        Integer integer = Account.access.get(key);
+        if (null == integer) {
+            Account.access.put(key,0);
+            return "success";
+        }
+        return "已调用接口次数：" + integer.toString();
+    }
+
+    @RequestMapping("count")
+    public String count(){
+        return new Gson().toJson(Account.access);
+    }
+
+
 }
 
 
