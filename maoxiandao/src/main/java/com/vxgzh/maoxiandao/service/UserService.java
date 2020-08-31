@@ -1,6 +1,7 @@
 package com.vxgzh.maoxiandao.service;
 
 import com.vxgzh.maoxiandao.bean.User;
+import org.springframework.web.multipart.MultipartFile;
 
 public interface UserService {
 
@@ -30,4 +31,11 @@ public interface UserService {
      * @return
      */
     User getUserByName(String openId);
+
+    /**
+     * 图行识别
+     * @param file
+     * @return
+     */
+    String imageSegt(MultipartFile file);
 }
