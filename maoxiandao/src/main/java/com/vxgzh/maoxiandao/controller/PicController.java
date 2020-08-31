@@ -8,6 +8,7 @@ import com.vxgzh.maoxiandao.utils.HttpUtil;
 import com.vxgzh.maoxiandao.utils.MessageUtil;
 import org.apache.commons.io.FileUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.lang.Nullable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
@@ -41,7 +42,7 @@ public class PicController {
 
     @RequestMapping("uploadPic")
     public String upload(MultipartFile file){
-        if (file ==null) {
+            if (file ==null) {
             return "fail";
         }
         // 获取密钥并进行身份校验
@@ -153,18 +154,29 @@ public class PicController {
     }
 
     @RequestMapping("access")
-    public String access(String key){
+    public String access(@Nullable String key){
         Integer integer = Account.access.get(key);
         if (null == integer) {
             Account.access.put(key,0);
-            return "success";
+            return "success:key="+key;
         }
-        return "已调用接口次数：" + integer.toString();
+        return key + "已调用接口次数：" + integer.toString();
     }
 
     @RequestMapping("count")
     public String count(){
         return new Gson().toJson(Account.access);
+    }
+
+    @RequestMapping("deleteAccess")
+    public String deleteAccess(@Nullable String key){
+        Integer integer = Account.access.get(key);
+        if (null != integer) {
+            String format = new SimpleDateFormat("yyyyMMdd-HHmmss-SSS").format(new Date());
+            Account.access.put(key + format,integer);
+            Account.access.remove(key);
+        }
+        return "success:key="+key;
     }
 
 
