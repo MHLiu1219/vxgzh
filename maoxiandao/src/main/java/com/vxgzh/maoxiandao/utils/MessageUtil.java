@@ -28,7 +28,7 @@ public class MessageUtil {
     public static void SendMsg(String json){
         //发送消息的url
         String url= VxUrl.SEND_MESSAGE_CUSTOMER_SERVICE_URL;
-        String accessToken = AccessTokenUtil.getAccessToken();
+        String accessToken = VxAccessTokenUtil.getAccessToken();
         url = url.replaceAll("ACCESS_TOKEN", accessToken);
         String httpsRequest = HttpUtil.httpsPost(url, json);
         log.info(httpsRequest);

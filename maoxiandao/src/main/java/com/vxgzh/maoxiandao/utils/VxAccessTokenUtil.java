@@ -20,12 +20,12 @@ import java.util.concurrent.locks.ReentrantLock;
  * @CreateTime: 2020-07-19
  * @Description:
  */
-public class AccessTokenUtil {
-    public static String url= VxUrl.BASE_SUPPORT_GET_ACCESS_TOKEN_URL;
+public class VxAccessTokenUtil {
+    public static final String url= VxUrl.BASE_SUPPORT_GET_ACCESS_TOKEN_URL;
     private static Map<String,AccessToken> map = new ConcurrentHashMap<>();
     private static Date updateTime = new Date();
     private static Lock lock = new ReentrantLock();
-    private static final Logger log = LoggerFactory.getLogger(AccessTokenUtil.class);
+    private static final Logger log = LoggerFactory.getLogger(VxAccessTokenUtil.class);
 
     static {
         flushAccessToken();

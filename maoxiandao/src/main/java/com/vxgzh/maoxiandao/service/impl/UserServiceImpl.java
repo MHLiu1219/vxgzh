@@ -103,4 +103,12 @@ public class UserServiceImpl implements UserService {
         return uploadTuPian(userKey);
     }
 
+    @Override
+    public User getUserByName(String openId) {
+        QueryWrapper<User> wrapper = new QueryWrapper<>();
+        wrapper.eq("name",openId);
+        User user = userMapper.selectOne(wrapper);
+        return user;
+    }
+
 }

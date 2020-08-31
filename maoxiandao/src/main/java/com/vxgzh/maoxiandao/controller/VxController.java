@@ -1,10 +1,11 @@
 package com.vxgzh.maoxiandao.controller;
 
+import com.vxgzh.maoxiandao.bean.User;
 import com.vxgzh.maoxiandao.bean.xml.InMsgEntity;
 import com.vxgzh.maoxiandao.bean.xml.OutMsgEntity;
 import com.vxgzh.maoxiandao.common.Account;
 import com.vxgzh.maoxiandao.service.UserService;
-import com.vxgzh.maoxiandao.utils.AccessTokenUtil;
+import com.vxgzh.maoxiandao.utils.VxAccessTokenUtil;
 import com.vxgzh.maoxiandao.utils.MessageUtil;
 import com.vxgzh.maoxiandao.utils.SignUtil;
 import org.slf4j.Logger;
@@ -48,9 +49,10 @@ public class VxController {
         OutMsgEntity outMsgEntity = new OutMsgEntity();
         outMsgEntity.setFromUserName(inMsgEntity.getToUserName());
         outMsgEntity.setToUserName(inMsgEntity.getFromUserName());
+        outMsgEntity.setContent("系统可能发生了故障，请联系管理员");
 
         // 注册绑定
-        if (inMsgEntity.getContent() != null && "@".equals(inMsgEntity.getContent().substring(0,1))) {
+        if (inMsgEntity.getContent() != null && "@".equals(inMsgEntity.getContent())) {
             // 密钥(卡号)
             String key = inMsgEntity.getContent().substring(1);
 
@@ -58,24 +60,30 @@ public class VxController {
             String uuid = userService.addUser(openId);
 
             // 返回成功信息
-            outMsgEntity.setContent("注册成功，您的密钥为："+uuid);
+            outMsgEntity.setContent("注册成功，您的密钥为："+uuid + "\n验证码：请用wasd表示箭头方向");
+
+            return outMsgEntity.getTextXml();
+        }
+
+        // 查询用户是否存在
+        User user = userService.getUserByName(openId);
+        if (user == null) {
+            outMsgEntity.setContent("您未注册，请发送@字符进行注册");
+            return outMsgEntity.getTextXml();
         }
 
         // 保存验证码
-        if (inMsgEntity.getContent() != null && "#".equals(inMsgEntity.getContent().substring(0,1))) {
+        if (inMsgEntity.getContent() != null && inMsgEntity.getContent().length() <= 4) {
             // 验证码
-            String code = inMsgEntity.getContent().substring(1);
+            String code = inMsgEntity.getContent();
 
             // todo 把这最新的验证码保存到数据库
             userService.addCode(openId,code);
 
             // 返回成功信息
             outMsgEntity.setContent("开始验证。。。");
-        }
-        // 其它不处理
-        if (outMsgEntity.getContent() == null) {
-            outMsgEntity.setContent("注册绑定：发送@字符" +
-                    "游戏检查验证：#验证码（用wasd表示箭头方向的四个方向）\n例如：#wwad");
+        } else {
+            outMsgEntity.setContent("请不要发送超过四个字符的信息\n验证码：请用wasd表示箭头方向");
         }
         return outMsgEntity.getTextXml();
     }
@@ -93,10 +101,11 @@ public class VxController {
         Account.APPSECRET=appsecret;
         log.info("修改成功update appID success");
         // 更新access_key
-        AccessTokenUtil.flushAccessToken();
-        if (AccessTokenUtil.getAccessToken() == null) {
+        VxAccessTokenUtil.flushAccessToken();
+        if (VxAccessTokenUtil.getAccessToken() == null) {
             return "flush access_token fail";
         }
         return "success";
     }
+
 }

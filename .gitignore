@@ -25,3 +25,6 @@ hs_err_pid*
 vxgzh.iml
 /.idea/
 /maoxiandao/maoxiandao.iml
+/*/src/main/resources/rebel.xml
+/*/src/main/resources/rebel-remote.xml
+temp.jpg

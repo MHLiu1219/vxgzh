@@ -1,5 +1,7 @@
 package com.vxgzh.maoxiandao.service;
 
+import com.vxgzh.maoxiandao.bean.User;
+
 public interface UserService {
 
 
@@ -21,4 +23,11 @@ public interface UserService {
      * @return
      */
     String getUserByUuid(String userKey);
+
+    /**
+     * 根据微信号查询用户
+     * @param openId
+     * @return
+     */
+    User getUserByName(String openId);
 }
