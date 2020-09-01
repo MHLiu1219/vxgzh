@@ -1,5 +1,6 @@
 package com.vxgzh.maoxiandao.utils;
 
+import com.google.gson.Gson;
 import org.apache.http.HttpEntity;
 import org.apache.http.ParseException;
 import org.apache.http.client.ClientProtocolException;
@@ -12,10 +13,12 @@ import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.util.EntityUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.util.StringUtils;
 
 import javax.net.ssl.HttpsURLConnection;
 import java.io.*;
 import java.net.URL;
+import java.util.HashMap;
 
 /**
  * HttpUtil
@@ -30,6 +33,7 @@ public class HttpUtil {
 
     /**
      * 发送get请求
+     *
      * @param url
      * @return
      */
@@ -75,6 +79,7 @@ public class HttpUtil {
 
     /**
      * 发送post请求
+     *
      * @param url
      * @param json
      * @return
@@ -136,18 +141,24 @@ public class HttpUtil {
      */
     /**
      * 文件上传
-     * @param urlStr 地址
+     *
+     * @param urlStr   地址
      * @param fileType 文件类型
-     * @param file 文件
+     * @param file     文件
      * @return 结果
      */
-    public static String upload(String urlStr,String fileType,File file){
-        String result=null;
+    public static String upload(String urlStr, String fileType, File file) {
+        String result = null;
         try {
-            String  token= VxAccessTokenUtil.getAccessToken();
-            String urlString=urlStr.replace("ACCESS_TOKEN", token).replace("TYPE", fileType);
-            URL url=new URL(urlString);
-            HttpsURLConnection conn=(HttpsURLConnection) url.openConnection();
+            String token = VxAccessTokenUtil.getAccessToken();
+            if (StringUtils.isEmpty(token)) {
+                HashMap<String, String> error = new HashMap<>();
+                error.put("error","access token is null!");
+                return new Gson().toJson(error);
+            }
+            String urlString = urlStr.replace("ACCESS_TOKEN", token).replace("TYPE", fileType);
+            URL url = new URL(urlString);
+            HttpsURLConnection conn = (HttpsURLConnection) url.openConnection();
             conn.setRequestMethod("POST");//以POST方式提交表单
             conn.setDoInput(true);
             conn.setDoOutput(true);
@@ -156,73 +167,73 @@ public class HttpUtil {
             conn.setRequestProperty("Connection", "Keep-Alive");
             conn.setRequestProperty("Charset", "UTF-8");
             //设置边界
-            String BOUNDARY="----------"+System.currentTimeMillis();
+            String BOUNDARY = "----------" + System.currentTimeMillis();
             conn.setRequestProperty("Content-Type", "multipart/form-data; boundary=" + BOUNDARY);
             //请求正文信息
             //第一部分
-            StringBuilder sb=new StringBuilder();
+            StringBuilder sb = new StringBuilder();
             sb.append("--");//必须多两条道
             sb.append(BOUNDARY);
             sb.append("\r\n");
-            sb.append("Content-Disposition: form-data;name=\"media\"; filename=\"" + file.getName()+"\"\r\n");
+            sb.append("Content-Disposition: form-data;name=\"media\"; filename=\"" + file.getName() + "\"\r\n");
             sb.append("Content-Type:application/octet-stream\r\n\r\n");
-            log.info("发送文件请求正文信息:"+sb);
+            log.info("发送文件请求正文信息:" + sb);
 
             //获得输出流
-            OutputStream out=new DataOutputStream(conn.getOutputStream());
+            OutputStream out = new DataOutputStream(conn.getOutputStream());
             //输出表头
             out.write(sb.toString().getBytes("UTF-8"));
             //文件正文部分
             //把文件以流的方式 推送道URL中
-            DataInputStream din=new DataInputStream(new FileInputStream(file));
-            int bytes=0;
-            byte[] buffer=new byte[1024];
-            while((bytes=din.read(buffer))!=-1){
-                out.write(buffer,0,bytes);
+            DataInputStream din = new DataInputStream(new FileInputStream(file));
+            int bytes = 0;
+            byte[] buffer = new byte[1024];
+            while ((bytes = din.read(buffer)) != -1) {
+                out.write(buffer, 0, bytes);
             }
             din.close();
             //结尾部分
-            byte[] foot=("\r\n--" + BOUNDARY + "--\r\n").getBytes("UTF-8");//定义数据最后分割线
+            byte[] foot = ("\r\n--" + BOUNDARY + "--\r\n").getBytes("UTF-8");//定义数据最后分割线
             out.write(foot);
             out.flush();
             out.close();
-            if(HttpsURLConnection.HTTP_OK==conn.getResponseCode()){
+            if (HttpsURLConnection.HTTP_OK == conn.getResponseCode()) {
 
-                StringBuffer strbuffer=null;
-                BufferedReader reader=null;
+                StringBuffer strbuffer = null;
+                BufferedReader reader = null;
                 try {
-                    strbuffer=new StringBuffer();
-                    reader=new BufferedReader(new InputStreamReader(conn.getInputStream()));
-                    String lineString=null;
-                    while((lineString=reader.readLine())!=null){
+                    strbuffer = new StringBuffer();
+                    reader = new BufferedReader(new InputStreamReader(conn.getInputStream()));
+                    String lineString = null;
+                    while ((lineString = reader.readLine()) != null) {
                         strbuffer.append(lineString);
 
                     }
-                    if(result==null){
-                        result=strbuffer.toString();
-                        log.info("POST文件响应结果:"+result);
+                    if (result == null) {
+                        result = strbuffer.toString();
+                        log.info("POST文件响应结果:" + result);
                     }
                 } catch (IOException e) {
-                    log.error("发送POST文件请求出现异常！",e);
+                    log.error("发送POST文件请求出现异常！", e);
                     e.printStackTrace();
-                }finally{
-                    if(reader!=null){
+                } finally {
+                    if (reader != null) {
                         reader.close();
                     }
                 }
 
             }
-        }  catch (IOException e) {
+        } catch (IOException e) {
             e.printStackTrace();
         }
         return result;
     }
 
     public static String postFile(String url, String key, File value) {
-        String result=null;
+        String result = null;
         try {
             URL url1 = new URL(url);
-            HttpsURLConnection conn=(HttpsURLConnection) url1.openConnection();
+            HttpsURLConnection conn = (HttpsURLConnection) url1.openConnection();
             conn.setRequestMethod("POST");//以POST方式提交表单
             conn.setDoInput(true);
             conn.setDoOutput(true);
@@ -231,63 +242,63 @@ public class HttpUtil {
             conn.setRequestProperty("Connection", "Keep-Alive");
             conn.setRequestProperty("Charset", "UTF-8");
             //设置边界
-            String BOUNDARY="----------"+System.currentTimeMillis();
+            String BOUNDARY = "----------" + System.currentTimeMillis();
             conn.setRequestProperty("Content-Type", "multipart/form-data; boundary=" + BOUNDARY);
             //请求正文信息
             //第一部分
-            StringBuilder sb=new StringBuilder();
+            StringBuilder sb = new StringBuilder();
             sb.append("--");//必须多两条道
             sb.append(BOUNDARY);
             sb.append("\r\n");
-            sb.append("Content-Disposition: form-data;name=\""+key+"\"; filename=\"" + value.getName()+"\"\r\n");
+            sb.append("Content-Disposition: form-data;name=\"" + key + "\"; filename=\"" + value.getName() + "\"\r\n");
             sb.append("Content-Type:application/octet-stream\r\n\r\n");
-            log.info("发送文件请求正文信息:"+sb);
+            log.info("发送文件请求正文信息:" + sb);
 
             //获得输出流
-            OutputStream out=new DataOutputStream(conn.getOutputStream());
+            OutputStream out = new DataOutputStream(conn.getOutputStream());
             //输出表头
             out.write(sb.toString().getBytes("UTF-8"));
             //文件正文部分
             //把文件以流的方式 推送道URL中
-            DataInputStream din=new DataInputStream(new FileInputStream(value));
-            int bytes=0;
-            byte[] buffer=new byte[1024];
-            while((bytes=din.read(buffer))!=-1){
-                out.write(buffer,0,bytes);
+            DataInputStream din = new DataInputStream(new FileInputStream(value));
+            int bytes = 0;
+            byte[] buffer = new byte[1024];
+            while ((bytes = din.read(buffer)) != -1) {
+                out.write(buffer, 0, bytes);
             }
             din.close();
             //结尾部分
-            byte[] foot=("\r\n--" + BOUNDARY + "--\r\n").getBytes("UTF-8");//定义数据最后分割线
+            byte[] foot = ("\r\n--" + BOUNDARY + "--\r\n").getBytes("UTF-8");//定义数据最后分割线
             out.write(foot);
             out.flush();
             out.close();
-            if(HttpsURLConnection.HTTP_OK==conn.getResponseCode()){
+            if (HttpsURLConnection.HTTP_OK == conn.getResponseCode()) {
 
-                StringBuffer strbuffer=null;
-                BufferedReader reader=null;
+                StringBuffer strbuffer = null;
+                BufferedReader reader = null;
                 try {
-                    strbuffer=new StringBuffer();
-                    reader=new BufferedReader(new InputStreamReader(conn.getInputStream()));
-                    String lineString=null;
-                    while((lineString=reader.readLine())!=null){
+                    strbuffer = new StringBuffer();
+                    reader = new BufferedReader(new InputStreamReader(conn.getInputStream()));
+                    String lineString = null;
+                    while ((lineString = reader.readLine()) != null) {
                         strbuffer.append(lineString);
 
                     }
-                    if(result==null){
-                        result=strbuffer.toString();
-                        log.info("POST文件响应结果:"+result);
+                    if (result == null) {
+                        result = strbuffer.toString();
+                        log.info("POST文件响应结果:" + result);
                     }
                 } catch (IOException e) {
-                    log.error("发送POST文件请求出现异常！",e);
+                    log.error("发送POST文件请求出现异常！", e);
                     e.printStackTrace();
-                }finally{
-                    if(reader!=null){
+                } finally {
+                    if (reader != null) {
                         reader.close();
                     }
                 }
 
             }
-        }  catch (IOException e) {
+        } catch (IOException e) {
             e.printStackTrace();
         }
         return result;

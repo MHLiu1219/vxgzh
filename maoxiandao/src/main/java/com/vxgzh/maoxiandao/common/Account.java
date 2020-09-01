@@ -1,5 +1,6 @@
 package com.vxgzh.maoxiandao.common;
 
+import java.util.Date;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -21,6 +22,8 @@ public class Account {
     public static final String TEMPLETEID="fzpznIjhmHBlzSNy4mttsmOCW8qqJUIRvz5aKD8VADs";
 
     public static final Map<String,Integer> access = new ConcurrentHashMap<>();
+    public static final Map<String,Map<Date,Integer>> access_history = new ConcurrentHashMap<>();
+
 
     public static void main(String[] args) {
         System.out.println("o7a2zwtpEeUsfPzDdCHtDXd4sZHk".length());
