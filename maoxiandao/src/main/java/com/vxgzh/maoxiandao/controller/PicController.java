@@ -9,6 +9,7 @@ import com.vxgzh.maoxiandao.utils.MessageUtil;
 import org.apache.commons.io.FileUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.lang.Nullable;
+import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
@@ -61,10 +62,8 @@ public class PicController {
             }
         }
 
-        Integer count = Account.access.get(key);
-        if (null != count) {
+        if (checkAccess(key)) {
             String code = userService.imageSegt(file);
-            Account.access.put(key,count + 1);
             userService.addCode(userId,code);
         }
 
@@ -141,6 +140,9 @@ public class PicController {
         } catch (Exception e) {
             return "fail";
         }
+        if (!checkAccess(key)) {
+            return "Access Expired!";
+        }
         String userId = null;
         if(key!= null && key.length()>= 0){
             userId = userService.uploadTuPian(key);
@@ -153,18 +155,44 @@ public class PicController {
         return collect;
     }
 
+    private boolean checkAccess(String key) {
+        Integer count = Account.access.get(key);
+        Integer remain = Account.access.get(key + ":remain");
+        if (null == count || null == remain || remain <= 0) {
+            return false;
+        }
+
+        Account.access.put(key + ":remain",remain - 1);
+        Account.access.put(key,count + 1);
+        return true;
+    }
+
     @RequestMapping("access")
     public String access(@Nullable String key){
         Integer integer = Account.access.get(key);
         if (null == integer) {
             Account.access.put(key,0);
-            return "success:key="+key;
+            return "access success:key="+key;
         }
         return key + "已调用接口次数：" + integer.toString();
     }
 
+    @RequestMapping("add")
+    public String add(@Nullable String key, @Nullable Integer count){
+        Integer remain = Account.access.get(key + ":remain");
+        if (null == remain) {
+            Account.access.put(key + ":remain",count);
+            return "add success:key:remain=" + count;
+        }
+        Account.access.put(key + ":remain",remain + count);
+        return "add success:key:remain=" + Account.access.get(key + ":remain");
+    }
+
     @RequestMapping("count")
-    public String count(){
+    public String count(@Nullable String key){
+        if (!StringUtils.isEmpty(key)) {
+            return new Gson().toJson(Account.access.get(key));
+        }
         return new Gson().toJson(Account.access);
     }
 
@@ -172,11 +200,11 @@ public class PicController {
     public String deleteAccess(@Nullable String key){
         Integer integer = Account.access.get(key);
         if (null != integer) {
-            String format = new SimpleDateFormat("yyyyMMdd-HHmmss-SSS").format(new Date());
+            String format = new SimpleDateFormat("(yyyy-MM-dd HH:mm:ss)").format(new Date());
             Account.access.put(key + format,integer);
             Account.access.remove(key);
         }
-        return "success:key="+key;
+        return "delete success:key="+key;
     }
 
 
