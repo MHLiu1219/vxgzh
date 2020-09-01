@@ -13,7 +13,7 @@ import java.util.concurrent.ConcurrentHashMap;
 public class Account {
     //常量值，为了方便修改而不修改代码
     public static String APPID="wx74626a14d97c19cd";
-    public static String APPSECRET="d7126bf63431cc2fa619c9ef429de7ba";
+    public static String APPSECRET="d7126bf63431cc2fa619c9ef429de7b0";
 
     public static final String TOKEN="weixinCourse";
 
