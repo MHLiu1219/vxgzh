@@ -83,8 +83,9 @@ public class PicController {
         Date update = new Date();
         String dir = new SimpleDateFormat("yyyyMMdd").format(update);
         String imageName = new SimpleDateFormat("yyyyMMdd-HHmmss-SSS").format(update);
-        File file1 = new File("./image/"+dir+"/"+imageName+".jpg");
+        File file1 = null;
         try {
+            file1 = new File("/opt/app/image/"+dir+"/"+imageName+".jpg");
             FileUtils.copyInputStreamToFile(file.getInputStream(), file1);
         } catch (IOException e) {
             e.printStackTrace();
@@ -122,7 +123,7 @@ public class PicController {
         if (code == null || code.length() <= 0) {
             return null;
         }
-
+        key = userKey;
         String content = "获取到的结果为：CODE";
         if ("1".equals(flag)) {
             // 通知用户结果
@@ -154,6 +155,7 @@ public class PicController {
         if (userKey == null || userKey.length() == 0) {
             return "userKey Is Null!";
         }
+        key = userKey;
         content = content.replace("REMAIN","" + Account.access.get(key + ":remain"))
                 .replace("COUNT","" + Account.access.get(key));
         // 查询用户
@@ -313,6 +315,7 @@ public class PicController {
                     .replace("COUNT","" + Account.access.get(key));
             MessageUtil.sendTextMsg(userService.getUserByUuid(key), content);
         }
+
 
         if (null != count) {
             Map<Date, Integer> dateIntegerMap = Account.access_history.get(key);

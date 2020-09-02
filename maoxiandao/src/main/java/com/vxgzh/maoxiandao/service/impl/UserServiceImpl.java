@@ -66,6 +66,11 @@ public class UserServiceImpl implements UserService {
         QueryWrapper<User> wrapper = new QueryWrapper<>();
         wrapper.eq("uuid", userKey);
         User user = userMapper.selectOne(wrapper);
+
+        if (user == null) {
+            return null;
+        }
+
         String code = user.getCode();
 
         //获取到以后删除
