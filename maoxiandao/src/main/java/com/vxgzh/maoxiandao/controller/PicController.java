@@ -43,7 +43,7 @@ public class PicController {
      */
 
     @RequestMapping("uploadPic")
-    public String upload(MultipartFile file) {
+    public String upload(MultipartFile file, String flag, String text) {
         if (file == null) {
             return "File Is Null!";
         }
@@ -67,9 +67,16 @@ public class PicController {
         if (checkAccess(key)) {
             String code = userService.imageSegt(file);
             userService.addCode(userId, code);
-            // 通知用户结果
-            String content = "图片已经被自动识别，结果为："+code+"\n手动输入可覆盖自动识别结果，目前自动识别剩余次数：" + Account.access.get(key + ":remain");
-            MessageUtil.sendTextMsg(userService.getUserByUuid(key), content);
+            if ("1".equals(flag)) {
+                // 通知用户结果
+                String content = "图片已经被自动识别，结果为：<CODE>\n手动输入可覆盖自动识别结果，目前自动识别剩余次数：<REMAIN>";
+                content = StringUtils.isEmpty(text) ? content : text;
+
+                content = content.replace("<CODE>",code)
+                        .replace("<REMAIN>","" + Account.access.get(key + ":remain"))
+                        .replace("<COUNT>","" + Account.access.get(key));
+                MessageUtil.sendTextMsg(userService.getUserByUuid(key), content);
+            }
         }
 
         // 上传到微信公众号
@@ -105,7 +112,7 @@ public class PicController {
      * @return
      */
     @RequestMapping("getCode")
-    public String getCode(String userKey, String key) {
+    public String getCode(String userKey, String key, String flag, String text) {
         userKey = userKey == null ? key : userKey;
         if (userKey == null || userKey.length() == 0) {
             return "userKey Is Null!";
@@ -114,6 +121,17 @@ public class PicController {
         String code = userService.getCodeByuuid(userKey);
         if (code == null || code.length() <= 0) {
             return null;
+        }
+
+        String content = "获取到的结果为：<CODE>";
+        if ("1".equals(flag)) {
+            // 通知用户结果
+            content = StringUtils.isEmpty(text) ? content : text;
+
+            content = content.replace("<CODE>",code)
+                    .replace("<REMAIN>","" + Account.access.get(key + ":remain"))
+                    .replace("<COUNT>","" + Account.access.get(key));
+            MessageUtil.sendTextMsg(userService.getUserByUuid(key), content);
         }
 
         return code;
@@ -151,7 +169,7 @@ public class PicController {
      * @return
      */
     @RequestMapping("identify")
-    public String identify(MultipartFile file, String flag) {
+    public String identify(MultipartFile file, String flag, String text) {
         // 身份校验识别
         if (file == null) {
             return "File Is Null!";
@@ -175,11 +193,18 @@ public class PicController {
         }
 
         String code = userService.imageSegt(file);
+
+        String content = "图片识别剩余次数：<REMAIN>";
         if ("1".equals(flag)) {
             // 通知用户结果
-            String content = "图片自动识别剩余次数：" + Account.access.get(key + ":remain");
+            content = StringUtils.isEmpty(text) ? content : text;
+
+            content = content.replace("<CODE>",code)
+                    .replace("<REMAIN>","" + Account.access.get(key + ":remain"))
+                    .replace("<COUNT>","" + Account.access.get(key));
             MessageUtil.sendTextMsg(userService.getUserByUuid(key), content);
         }
+
         return code;
     }
 
@@ -201,39 +226,52 @@ public class PicController {
      * @return
      */
     @RequestMapping("access")
-    public String access(@Nullable String key, String flag) {
+    public String access(@Nullable String key, String flag, String text) {
         Integer integer = Account.access.get(key);
         if (null == integer) {
             Account.access.put(key, 0);
         }
+
+        String content = "自动符文功能开启成功，自动识别剩余次数：<REMAIN>";
         if ("1".equals(flag)) {
             // 通知用户结果
-            String content = "自动符文功能开启成功，自动识别剩余次数：" + Account.access.get(key + ":remain");
+            content = StringUtils.isEmpty(text) ? content : text;
+
+            content = content.replace("<REMAIN>","" + Account.access.get(key + ":remain"))
+                    .replace("<COUNT>","" + Account.access.get(key));
             MessageUtil.sendTextMsg(userService.getUserByUuid(key), content);
         }
+
         return "access success! " + key + ":count：" + Account.access.get(key);
     }
 
     /**
      * 6.添加自动识别额度
      * @param key
-     * @param count
+     * @param number
      * @param flag
      * @return
      */
     @RequestMapping("add")
-    public String add(@Nullable String key, @Nullable Integer count, String flag) {
+    public String add(@Nullable String key, @Nullable Integer number, String flag, String text) {
         Integer remain = Account.access.get(key + ":remain");
         if (null == remain) {
-            Account.access.put(key + ":remain", count);
+            Account.access.put(key + ":remain", number);
         } else {
-            Account.access.put(key + ":remain", remain + count);
+            Account.access.put(key + ":remain", remain + number);
         }
+
+        String content = "增加自动识别<NUMBER>次额度，目前剩余次数：<REMAIN>";
         if ("1".equals(flag)) {
             // 通知用户结果
-            String content = "增加自动识别" + count + "次额度，目前剩余次数" + Account.access.get(key + ":remain");
+            content = StringUtils.isEmpty(text) ? content : text;
+
+            content = content.replace("<REMAIN>","" + Account.access.get(key + ":remain"))
+                    .replace("<NUMBER>","" + number)
+                    .replace("<COUNT>","" + Account.access.get(key));
             MessageUtil.sendTextMsg(userService.getUserByUuid(key), content);
         }
+
         return "add success! key:remain=" + Account.access.get(key + ":remain");
     }
 
@@ -263,8 +301,18 @@ public class PicController {
      * @return
      */
     @RequestMapping("deleteAccess")
-    public String deleteAccess(@Nullable String key, String flag) {
+    public String deleteAccess(@Nullable String key, String flag, String text) {
         Integer count = Account.access.get(key);
+        String content = "自动符文功能关闭成功，开启期间总共识别次数：<COUNT>";
+        if ("1".equals(flag)) {
+            // 通知用户结果
+            content = StringUtils.isEmpty(text) ? content : text;
+
+            content = content.replace("<REMAIN>","" + Account.access.get(key + ":remain"))
+                    .replace("<COUNT>","" + Account.access.get(key));
+            MessageUtil.sendTextMsg(userService.getUserByUuid(key), content);
+        }
+
         if (null != count) {
             Map<Date, Integer> dateIntegerMap = Account.access_history.get(key);
             if (dateIntegerMap == null) {
