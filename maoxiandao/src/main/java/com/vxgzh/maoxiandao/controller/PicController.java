@@ -154,7 +154,8 @@ public class PicController {
         if (userKey == null || userKey.length() == 0) {
             return "userKey Is Null!";
         }
-
+        content = content.replace("REMAIN","" + Account.access.get(key + ":remain"))
+                .replace("COUNT","" + Account.access.get(key));
         // 查询用户
         String userName = userService.getUserByUuid(userKey);
         // 通知用户结果
