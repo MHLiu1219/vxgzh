@@ -15,6 +15,7 @@ import org.springframework.util.Base64Utils;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
@@ -32,16 +33,16 @@ public class UserServiceImpl implements UserService {
 
 
     @Autowired
-    UserMapper userMapper;
+    private UserMapper userMapper;
 
     @Value("${baidu.api.image.segt}")
-    String apiUrl;
+    private String apiUrl;
 
     /**
      * 根据图片名 获取用户微信号
      *
-     * @param key
-     * @return
+     * @param key uuid
+     * @return openid
      */
     @Override
     public String uploadTuPian(String key) {
@@ -51,15 +52,14 @@ public class UserServiceImpl implements UserService {
         if (user == null) {
             return null;
         }
-        String name = user.getName();
-        return name;
+        return user.getName();
     }
 
     /**
      * 查询用户最新输入验证码 同时删除
      *
-     * @param userKey
-     * @return
+     * @param userKey uuid
+     * @return code
      */
     @Override
     public String getCodeByuuid(String userKey) {
@@ -83,8 +83,8 @@ public class UserServiceImpl implements UserService {
     /**
      * 注册
      *
-     * @param openId
-     * @return
+     * @param openId 微信号
+     * @return uuid
      */
     @Override
     public String addUser(String openId) {
@@ -96,7 +96,7 @@ public class UserServiceImpl implements UserService {
         }
         user = new User();
         String s = UUID.randomUUID().toString();
-        String uuid = s.replaceAll("\\-", "");
+        String uuid = s.replaceAll("-", "");
         uuid = uuid.substring(0, 10);
         user.setName(openId);
         user.setUuid(uuid);
@@ -107,8 +107,8 @@ public class UserServiceImpl implements UserService {
     /**
      * 跟新验证码
      *
-     * @param openId
-     * @param code
+     * @param openId 微信号
+     * @param code 符文（验证码）
      */
     @Override
     public void addCode(String openId, String code) {
@@ -128,8 +128,7 @@ public class UserServiceImpl implements UserService {
     public User getUserByName(String openId) {
         QueryWrapper<User> wrapper = new QueryWrapper<>();
         wrapper.eq("name", openId);
-        User user = userMapper.selectOne(wrapper);
-        return user;
+        return userMapper.selectOne(wrapper);
     }
 
     @Override
@@ -139,7 +138,7 @@ public class UserServiceImpl implements UserService {
         // 调用接口
         String url = apiUrl.replace("ACCESS_TOKEN", accessToken);
         // 结果处理
-        String resp = "";
+        String resp;
         Gson gson = new Gson();
 
         String imageBase64 = null;
@@ -149,7 +148,7 @@ public class UserServiceImpl implements UserService {
             System.out.println("error,图片转imageBase64");
         }
 
-        Map<String, Object> map = new HashMap<>();
+        Map<String, Object> map = new HashMap<>(1);
         map.put("image", imageBase64);
         resp = HttpUtil.httpsPost(url, gson.toJson(map));
         // 返回
@@ -158,10 +157,9 @@ public class UserServiceImpl implements UserService {
             return "-1";
         }
 
-        String collect = result.getResults().stream()
-                .sorted((s1, s2) -> s1.getLocation().getLeft().compareTo(s2.getLocation().getLeft()))
-                .map(m -> m.getName()).collect(Collectors.joining());
-        return collect;
+        return result.getResults().stream()
+                .sorted(Comparator.comparing(s -> s.getLocation().getLeft()))
+                .map(m -> m.getName().substring(0,1)).collect(Collectors.joining());
     }
 
 }
