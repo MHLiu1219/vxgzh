@@ -5,6 +5,7 @@ import com.google.gson.Gson;
 import com.vxgzh.maoxiandao.bean.BaiduImageSegtResult;
 import com.vxgzh.maoxiandao.bean.WjUser;
 import com.vxgzh.maoxiandao.mapper.UserMapper;
+import com.vxgzh.maoxiandao.service.BaiduAccessService;
 import com.vxgzh.maoxiandao.service.UserService;
 import com.vxgzh.maoxiandao.utils.BaiduAccessTokenUtil;
 import com.vxgzh.maoxiandao.utils.HttpUtil;
@@ -34,6 +35,8 @@ public class UserServiceImpl implements UserService {
 
     @Autowired
     private UserMapper userMapper;
+    @Autowired
+    private BaiduAccessService baiduAccessService;
 
     @Value("${baidu.api.image.segt}")
     private String apiUrl;
