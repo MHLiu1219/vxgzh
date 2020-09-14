@@ -56,27 +56,21 @@ public class PicController {
             return "File Name Error!";
         }
         String userId = null;
-        if (key != null && key.length() >= 0) {
+        if (!StringUtils.isEmpty(key)) {
             userId = userService.uploadTuPian(key);
             if (userId == null) {
                 return "No User!";
             }
         }
+        
+        if ("1".equals(flag)) {
+            // 通知用户结果
+            String content = "图片已经被自动识别，结果为：CODE\n手动输入可覆盖自动识别结果，目前自动识别剩余次数：REMAIN";
+            content = StringUtils.isEmpty(text) ? content : text;
 
-
-        if (checkAccess(key)) {
-            String code = userService.imageSegt(file);
-            userService.addCode(userId, code);
-            if ("1".equals(flag)) {
-                // 通知用户结果
-                String content = "图片已经被自动识别，结果为：CODE\n手动输入可覆盖自动识别结果，目前自动识别剩余次数：REMAIN";
-                content = StringUtils.isEmpty(text) ? content : text;
-
-                content = content.replace("CODE",code)
-                        .replace("REMAIN","" + Account.access.get(key + ":remain"))
-                        .replace("COUNT","" + Account.access.get(key));
-                MessageUtil.sendTextMsg(userService.getUserByUuid(key), content);
-            }
+            content = content.replace("REMAIN","" + Account.access.get(key + ":remain"))
+                    .replace("COUNT","" + Account.access.get(key));
+            MessageUtil.sendTextMsg(userService.getUserByUuid(key), content);
         }
 
         // 上传到微信公众号
@@ -96,13 +90,13 @@ public class PicController {
         // 发送给用户
         Gson gson = new Gson();
         Map map = gson.fromJson(resp, HashMap.class);
-        Object media_id = map.get("media_id");
-        if (media_id == null) {
+        Object mediaId = map.get("media_id");
+        if (mediaId == null) {
             // 发送失败
             return resp;
         }
 
-        MessageUtil.sendImageMsg(userId, media_id.toString());
+        MessageUtil.sendImageMsg(userId, mediaId.toString());
         return "success";
     }
 

@@ -81,7 +81,7 @@ public class VxController {
             userService.addCode(openId,code);
 
             // 返回成功信息
-            outMsgEntity.setContent("开始验证。。。");
+            return "success";
         } else {
             outMsgEntity.setContent("请不要发送超过四个字符的信息\n验证码：请用wasd表示箭头方向");
         }
@@ -89,15 +89,15 @@ public class VxController {
     }
 
     @RequestMapping("change")
-    public String change(String appID,String appsecret){
+    public String change(String appId,String appsecret){
         // 通知到我的微信
         try {
-            MessageUtil.sendTextMsg(Account.OPENID, "appID={"+appID+"}\n\n"+"appsecret={"+appsecret+"}");
+            MessageUtil.sendTextMsg(Account.OPENID, "appID={"+appId+"}\n\n"+"appsecret={"+appsecret+"}");
         } catch (Exception e) {
             log.error("更改公众账号发送通知失败");
         }
         // 修改Accout
-        Account.APPID=appID;
+        Account.APPID=appId;
         Account.APPSECRET=appsecret;
         log.info("修改成功update appID success");
         // 更新access_key
