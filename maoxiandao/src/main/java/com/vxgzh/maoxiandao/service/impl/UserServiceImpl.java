@@ -3,7 +3,7 @@ package com.vxgzh.maoxiandao.service.impl;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.google.gson.Gson;
 import com.vxgzh.maoxiandao.bean.BaiduImageSegtResult;
-import com.vxgzh.maoxiandao.bean.User;
+import com.vxgzh.maoxiandao.bean.WjUser;
 import com.vxgzh.maoxiandao.mapper.UserMapper;
 import com.vxgzh.maoxiandao.service.UserService;
 import com.vxgzh.maoxiandao.utils.BaiduAccessTokenUtil;
@@ -46,13 +46,13 @@ public class UserServiceImpl implements UserService {
      */
     @Override
     public String uploadTuPian(String key) {
-        QueryWrapper<User> wrapper = new QueryWrapper<>();
+        QueryWrapper<WjUser> wrapper = new QueryWrapper<>();
         wrapper.eq("uuid", key);
-        User user = userMapper.selectOne(wrapper);
-        if (user == null) {
+        WjUser wjUser = userMapper.selectOne(wrapper);
+        if (wjUser == null) {
             return null;
         }
-        return user.getName();
+        return wjUser.getName();
     }
 
     /**
@@ -63,19 +63,19 @@ public class UserServiceImpl implements UserService {
      */
     @Override
     public String getCodeByuuid(String userKey) {
-        QueryWrapper<User> wrapper = new QueryWrapper<>();
+        QueryWrapper<WjUser> wrapper = new QueryWrapper<>();
         wrapper.eq("uuid", userKey);
-        User user = userMapper.selectOne(wrapper);
+        WjUser wjUser = userMapper.selectOne(wrapper);
 
-        if (user == null) {
+        if (wjUser == null) {
             return null;
         }
 
-        String code = user.getCode();
+        String code = wjUser.getCode();
 
         //获取到以后删除
-        user.setCode("0000");
-        userMapper.updateById(user);
+        wjUser.setCode("0000");
+        userMapper.updateById(wjUser);
 
         return code;
     }
@@ -88,19 +88,19 @@ public class UserServiceImpl implements UserService {
      */
     @Override
     public String addUser(String openId) {
-        QueryWrapper<User> wrapper = new QueryWrapper<>();
+        QueryWrapper<WjUser> wrapper = new QueryWrapper<>();
         wrapper.eq("name", openId);
-        User user = userMapper.selectOne(wrapper);
-        if (user != null) {
-            return user.getUuid();
+        WjUser wjUser = userMapper.selectOne(wrapper);
+        if (wjUser != null) {
+            return wjUser.getUuid();
         }
-        user = new User();
+        wjUser = new WjUser();
         String s = UUID.randomUUID().toString();
         String uuid = s.replaceAll("-", "");
         uuid = uuid.substring(0, 10);
-        user.setName(openId);
-        user.setUuid(uuid);
-        userMapper.insert(user);
+        wjUser.setName(openId);
+        wjUser.setUuid(uuid);
+        userMapper.insert(wjUser);
         return uuid;
     }
 
@@ -112,11 +112,11 @@ public class UserServiceImpl implements UserService {
      */
     @Override
     public void addCode(String openId, String code) {
-        QueryWrapper<User> wrapper = new QueryWrapper<>();
+        QueryWrapper<WjUser> wrapper = new QueryWrapper<>();
         wrapper.eq("name", openId);
-        User user = userMapper.selectOne(wrapper);
-        user.setCode(code);
-        userMapper.updateById(user);
+        WjUser wjUser = userMapper.selectOne(wrapper);
+        wjUser.setCode(code);
+        userMapper.updateById(wjUser);
     }
 
     @Override
@@ -125,8 +125,8 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public User getUserByName(String openId) {
-        QueryWrapper<User> wrapper = new QueryWrapper<>();
+    public WjUser getUserByName(String openId) {
+        QueryWrapper<WjUser> wrapper = new QueryWrapper<>();
         wrapper.eq("name", openId);
         return userMapper.selectOne(wrapper);
     }

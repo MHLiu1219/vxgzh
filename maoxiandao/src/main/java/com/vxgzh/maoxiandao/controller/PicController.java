@@ -1,8 +1,10 @@
 package com.vxgzh.maoxiandao.controller;
 
 import com.google.gson.Gson;
+import com.vxgzh.maoxiandao.bean.BaiduAccess;
 import com.vxgzh.maoxiandao.common.Account;
 import com.vxgzh.maoxiandao.common.VxUrl;
+import com.vxgzh.maoxiandao.service.BaiduAccessService;
 import com.vxgzh.maoxiandao.service.UserService;
 import com.vxgzh.maoxiandao.utils.HttpUtil;
 import com.vxgzh.maoxiandao.utils.MessageUtil;
@@ -19,6 +21,7 @@ import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -33,7 +36,9 @@ import java.util.Map;
 public class PicController {
 
     @Autowired
-    UserService userService;
+    private UserService userService;
+    @Autowired
+    private BaiduAccessService baiduAccessService;
 
     /**
      * 1.上传图片
@@ -62,15 +67,15 @@ public class PicController {
                 return "No User!";
             }
         }
-        
+
         if ("1".equals(flag)) {
             // 通知用户结果
+            BaiduAccess baiduAccess = baiduAccessService.getBaiduAccessByUuid(key);
             String content = "图片已经被自动识别，结果为：CODE\n手动输入可覆盖自动识别结果，目前自动识别剩余次数：REMAIN";
             content = StringUtils.isEmpty(text) ? content : text;
 
-            content = content.replace("REMAIN","" + Account.access.get(key + ":remain"))
-                    .replace("COUNT","" + Account.access.get(key));
-            MessageUtil.sendTextMsg(userService.getUserByUuid(key), content);
+            content = content.replace("REMAIN","" + baiduAccess.getRemain())
+                    .replace("COUNT","" + baiduAccess.getCount());
         }
 
         // 上传到微信公众号
@@ -120,12 +125,12 @@ public class PicController {
         key = userKey;
         String content = "获取到的结果为：CODE";
         if ("1".equals(flag)) {
+            BaiduAccess baiduAccess = baiduAccessService.getBaiduAccessByUuid(key);
             // 通知用户结果
             content = StringUtils.isEmpty(text) ? content : text;
-
             content = content.replace("CODE",code)
-                    .replace("REMAIN","" + Account.access.get(key + ":remain"))
-                    .replace("COUNT","" + Account.access.get(key));
+                    .replace("REMAIN","" + baiduAccess.getRemain())
+                    .replace("COUNT","" + baiduAccess.getCount());
             MessageUtil.sendTextMsg(userService.getUserByUuid(key), content);
         }
 
@@ -150,8 +155,9 @@ public class PicController {
             return "userKey Is Null!";
         }
         key = userKey;
-        content = content.replace("REMAIN","" + Account.access.get(key + ":remain"))
-                .replace("COUNT","" + Account.access.get(key));
+        BaiduAccess baiduAccess = baiduAccessService.getBaiduAccessByUuid(key);
+        content = content.replace("REMAIN","" + baiduAccess.getRemain())
+                .replace("COUNT","" + baiduAccess.getCount());
         // 查询用户
         String userName = userService.getUserByUuid(userKey);
         // 通知用户结果
@@ -182,7 +188,7 @@ public class PicController {
             return "Access Expired!";
         }
         String userId = null;
-        if (key != null && key.length() >= 0) {
+        if (!StringUtils.isEmpty(key)) {
             userId = userService.uploadTuPian(key);
             if (userId == null) {
                 return "No User!";
@@ -194,11 +200,12 @@ public class PicController {
         String content = "图片识别剩余次数：REMAIN";
         if ("1".equals(flag)) {
             // 通知用户结果
+            BaiduAccess baiduAccess = baiduAccessService.getBaiduAccessByUuid(key);
             content = StringUtils.isEmpty(text) ? content : text;
 
             content = content.replace("CODE",code)
-                    .replace("REMAIN","" + Account.access.get(key + ":remain"))
-                    .replace("COUNT","" + Account.access.get(key));
+                    .replace("REMAIN","" + baiduAccess.getRemain())
+                    .replace("COUNT","" + baiduAccess.getCount());
             MessageUtil.sendTextMsg(userService.getUserByUuid(key), content);
         }
 
@@ -224,9 +231,11 @@ public class PicController {
      */
     @RequestMapping("access")
     public String access(@Nullable String key, String flag, String text) {
-        Integer integer = Account.access.get(key);
-        if (null == integer) {
-            Account.access.put(key, 0);
+        BaiduAccess baiduAccess = baiduAccessService.getBaiduAccessByUuid(key);
+        if (baiduAccess == null) {
+            baiduAccessService.createAccess(key);
+        } else {
+            int i = baiduAccessService.chanceAccess(key, 1);
         }
 
         String content = "自动符文功能开启成功，自动识别剩余次数：REMAIN";
@@ -234,12 +243,12 @@ public class PicController {
             // 通知用户结果
             content = StringUtils.isEmpty(text) ? content : text;
 
-            content = content.replace("REMAIN","" + Account.access.get(key + ":remain"))
-                    .replace("COUNT","" + Account.access.get(key));
+            content = content.replace("REMAIN","" + baiduAccess.getRemain())
+                    .replace("COUNT","" + baiduAccess.getCount());
             MessageUtil.sendTextMsg(userService.getUserByUuid(key), content);
         }
 
-        return "access success! " + key + ":count：" + Account.access.get(key);
+        return "access success! " + key + ":count：" + baiduAccess.getCount();
     }
 
     /**
@@ -251,25 +260,21 @@ public class PicController {
      */
     @RequestMapping("add")
     public String add(@Nullable String key, @Nullable Integer number, String flag, String text) {
-        Integer remain = Account.access.get(key + ":remain");
-        if (null == remain) {
-            Account.access.put(key + ":remain", number);
-        } else {
-            Account.access.put(key + ":remain", remain + number);
-        }
+        int i = baiduAccessService.addRemain(key,number);
 
-        String content = "增加自动识别NUMBER次额度，目前剩余次数：REMAIN";
+        BaiduAccess baiduAccess = baiduAccessService.getBaiduAccessByUuid(key);
         if ("1".equals(flag)) {
             // 通知用户结果
+            String content = "增加自动识别NUMBER次额度，目前剩余次数：REMAIN";
             content = StringUtils.isEmpty(text) ? content : text;
 
-            content = content.replace("REMAIN","" + Account.access.get(key + ":remain"))
+            content = content.replace("REMAIN","" + baiduAccess.getRemain())
                     .replace("NUMBER","" + number)
-                    .replace("COUNT","" + Account.access.get(key));
+                    .replace("COUNT","" + baiduAccess.getCount());
             MessageUtil.sendTextMsg(userService.getUserByUuid(key), content);
         }
 
-        return "add success! key:remain=" + Account.access.get(key + ":remain");
+        return "add success! key:remain=" + baiduAccess.getRemain();
     }
 
     /**
@@ -281,14 +286,12 @@ public class PicController {
     public String count(String key) {
         Map<String,Object> jsonMap = new HashMap<>();
         if (!StringUtils.isEmpty(key)) {
-            jsonMap.put("count", Account.access.get(key));
-            jsonMap.put("remain", Account.access.get(key+":remain"));
-            jsonMap.put("access_history", Account.access_history.get(key));
-        } else {
-            jsonMap.put("access", Account.access);
-            jsonMap.put("access_history", Account.access_history);
+            List<BaiduAccess> baiduAccessList = baiduAccessService.getAllBaiduAccess();
+            return new Gson().toJson(baiduAccessList);
         }
-        return new Gson().toJson(jsonMap);
+
+        BaiduAccess baiduAccess = baiduAccessService.getBaiduAccessByUuid(key);
+        return new Gson().toJson(baiduAccess);
     }
 
     /**
@@ -299,28 +302,20 @@ public class PicController {
      */
     @RequestMapping("deleteAccess")
     public String deleteAccess(@Nullable String key, String flag, String text) {
-        Integer count = Account.access.get(key);
-        String content = "自动符文功能关闭成功，开启期间总共识别次数：COUNT";
+        int i = baiduAccessService.chanceAccess(key,0);
+
         if ("1".equals(flag)) {
             // 通知用户结果
+            BaiduAccess baiduAccess = baiduAccessService.getBaiduAccessByUuid(key);
+            String content = "自动符文功能关闭成功，开启期间总共识别次数：COUNT";
             content = StringUtils.isEmpty(text) ? content : text;
 
-            content = content.replace("REMAIN","" + Account.access.get(key + ":remain"))
-                    .replace("COUNT","" + Account.access.get(key));
+            content = content.replace("REMAIN","" + baiduAccess.getRemain())
+                    .replace("COUNT","" + baiduAccess.getCount());
             MessageUtil.sendTextMsg(userService.getUserByUuid(key), content);
         }
 
-
-        if (null != count) {
-            Map<Date, Integer> dateIntegerMap = Account.access_history.get(key);
-            if (dateIntegerMap == null) {
-                dateIntegerMap = new HashMap<>();
-            }
-            dateIntegerMap.put(new Date(),count);
-            Account.access.remove(key);
-            return "delete success! key=" + key;
-        }
-        return "No Key! key=" + key;
+        return i > 0 ? "success" : "No Key! key=" + key;
     }
 
 }

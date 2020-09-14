@@ -19,8 +19,9 @@ import java.io.Serializable;
 @Component
 @TableName(value = "wj_user")//指定表名
 @Data
-public class User implements Serializable {
+public class WjUser implements Serializable {
 
+    private static final long serialVersionUID = -6013930103462751307L;
     @TableId(value = "id",type = IdType.AUTO)//指定自增策略
     private Integer id;
     @TableField(value = "name",exist = true)

@@ -1,6 +1,6 @@
 package com.vxgzh.maoxiandao.controller;
 
-import com.vxgzh.maoxiandao.bean.User;
+import com.vxgzh.maoxiandao.bean.WjUser;
 import com.vxgzh.maoxiandao.bean.xml.InMsgEntity;
 import com.vxgzh.maoxiandao.bean.xml.OutMsgEntity;
 import com.vxgzh.maoxiandao.common.Account;
@@ -66,8 +66,8 @@ public class VxController {
         }
 
         // 查询用户是否存在
-        User user = userService.getUserByName(openId);
-        if (user == null) {
+        WjUser wjUser = userService.getUserByName(openId);
+        if (wjUser == null) {
             outMsgEntity.setContent("您未注册，请发送@字符进行注册");
             return outMsgEntity.getTextXml();
         }
