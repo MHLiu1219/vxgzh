@@ -1,6 +1,6 @@
 package com.vxgzh.maoxiandao.service;
 
-import com.vxgzh.maoxiandao.bean.WjUser;
+import com.vxgzh.maoxiandao.bean.WjmUser;
 import org.springframework.web.multipart.MultipartFile;
 
 public interface UserService {
@@ -30,7 +30,7 @@ public interface UserService {
      * @param openId
      * @return
      */
-    WjUser getUserByName(String openId);
+    WjmUser getUserByName(String openId);
 
     /**
      * 图行识别

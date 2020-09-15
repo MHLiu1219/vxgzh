@@ -15,24 +15,41 @@ import java.time.LocalDateTime;
 /**
  * @author MHLiu
  * @create 2020/9/14 20:45 星期一
- * @Description 百度ai接口调用日志
+ * @Description 百度ai接口信息类
  */
 @Component
-@TableName(value = "baidu_access_log")//指定表名
+@TableName(value = "baidu_card")//指定表名
 @Data
-public class BaiduAccessLog implements Serializable {
+public class BaiduCard implements Serializable {
+    private static final long serialVersionUID = 2630340480495319983L;
 
-    private static final long serialVersionUID = 2646600138985423651L;
     /**
      * 主键
      */
     @TableId(value = "id", type = IdType.AUTO)
     private Integer id;
     /**
-     * 接口id
+     * 卡号
      */
-    @TableField(value = "access_id")
-    private Integer accessId;
+    @TableField(value = "card_no")
+    private String cardNo;
+
+    /**
+     * 次数
+     */
+    @TableField(value = "count")
+    private Integer count;
+    /**
+     * 接口可调用次数
+     */
+    @TableField(value = "type")
+    private Integer type;
+    /**
+     * 接口可调用次数
+     */
+    @TableField(value = "status")
+    private Integer status;
+
     /**
      * 创建时间
      */

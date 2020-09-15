@@ -3,8 +3,8 @@ package com.vxgzh.maoxiandao.service.impl;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.google.gson.Gson;
 import com.vxgzh.maoxiandao.bean.BaiduImageSegtResult;
-import com.vxgzh.maoxiandao.bean.WjUser;
-import com.vxgzh.maoxiandao.mapper.UserMapper;
+import com.vxgzh.maoxiandao.bean.WjmUser;
+import com.vxgzh.maoxiandao.mapper.WjmUserMapper;
 import com.vxgzh.maoxiandao.service.BaiduAccessService;
 import com.vxgzh.maoxiandao.service.UserService;
 import com.vxgzh.maoxiandao.utils.BaiduAccessTokenUtil;
@@ -34,7 +34,7 @@ public class UserServiceImpl implements UserService {
 
 
     @Autowired
-    private UserMapper userMapper;
+    private WjmUserMapper wjmUserMapper;
     @Autowired
     private BaiduAccessService baiduAccessService;
 
@@ -49,13 +49,13 @@ public class UserServiceImpl implements UserService {
      */
     @Override
     public String uploadTuPian(String key) {
-        QueryWrapper<WjUser> wrapper = new QueryWrapper<>();
+        QueryWrapper<WjmUser> wrapper = new QueryWrapper<>();
         wrapper.eq("uuid", key);
-        WjUser wjUser = userMapper.selectOne(wrapper);
-        if (wjUser == null) {
+        WjmUser wjmUser = wjmUserMapper.selectOne(wrapper);
+        if (wjmUser == null) {
             return null;
         }
-        return wjUser.getName();
+        return wjmUser.getName();
     }
 
     /**
@@ -66,19 +66,19 @@ public class UserServiceImpl implements UserService {
      */
     @Override
     public String getCodeByuuid(String userKey) {
-        QueryWrapper<WjUser> wrapper = new QueryWrapper<>();
+        QueryWrapper<WjmUser> wrapper = new QueryWrapper<>();
         wrapper.eq("uuid", userKey);
-        WjUser wjUser = userMapper.selectOne(wrapper);
+        WjmUser wjmUser = wjmUserMapper.selectOne(wrapper);
 
-        if (wjUser == null) {
+        if (wjmUser == null) {
             return null;
         }
 
-        String code = wjUser.getCode();
+        String code = wjmUser.getCode();
 
         //获取到以后删除
-        wjUser.setCode("0000");
-        userMapper.updateById(wjUser);
+        wjmUser.setCode("0000");
+        wjmUserMapper.updateById(wjmUser);
 
         return code;
     }
@@ -91,19 +91,19 @@ public class UserServiceImpl implements UserService {
      */
     @Override
     public String addUser(String openId) {
-        QueryWrapper<WjUser> wrapper = new QueryWrapper<>();
+        QueryWrapper<WjmUser> wrapper = new QueryWrapper<>();
         wrapper.eq("name", openId);
-        WjUser wjUser = userMapper.selectOne(wrapper);
-        if (wjUser != null) {
-            return wjUser.getUuid();
+        WjmUser wjmUser = wjmUserMapper.selectOne(wrapper);
+        if (wjmUser != null) {
+            return wjmUser.getUuid();
         }
-        wjUser = new WjUser();
+        wjmUser = new WjmUser();
         String s = UUID.randomUUID().toString();
         String uuid = s.replaceAll("-", "");
         uuid = uuid.substring(0, 10);
-        wjUser.setName(openId);
-        wjUser.setUuid(uuid);
-        userMapper.insert(wjUser);
+        wjmUser.setName(openId);
+        wjmUser.setUuid(uuid);
+        wjmUserMapper.insert(wjmUser);
         return uuid;
     }
 
@@ -115,11 +115,11 @@ public class UserServiceImpl implements UserService {
      */
     @Override
     public void addCode(String openId, String code) {
-        QueryWrapper<WjUser> wrapper = new QueryWrapper<>();
+        QueryWrapper<WjmUser> wrapper = new QueryWrapper<>();
         wrapper.eq("name", openId);
-        WjUser wjUser = userMapper.selectOne(wrapper);
-        wjUser.setCode(code);
-        userMapper.updateById(wjUser);
+        WjmUser wjmUser = wjmUserMapper.selectOne(wrapper);
+        wjmUser.setCode(code);
+        wjmUserMapper.updateById(wjmUser);
     }
 
     @Override
@@ -128,10 +128,10 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public WjUser getUserByName(String openId) {
-        QueryWrapper<WjUser> wrapper = new QueryWrapper<>();
+    public WjmUser getUserByName(String openId) {
+        QueryWrapper<WjmUser> wrapper = new QueryWrapper<>();
         wrapper.eq("name", openId);
-        return userMapper.selectOne(wrapper);
+        return wjmUserMapper.selectOne(wrapper);
     }
 
     @Override
