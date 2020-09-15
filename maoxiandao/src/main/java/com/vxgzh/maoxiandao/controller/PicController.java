@@ -341,6 +341,7 @@ public class PicController {
         if (baiduCards.isEmpty()) {
             return "not";
         }
+
         baiduAccessService.addCards(baiduCards);
         return "success";
     }
