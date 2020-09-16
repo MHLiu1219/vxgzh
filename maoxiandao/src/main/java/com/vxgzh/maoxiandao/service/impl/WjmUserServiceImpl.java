@@ -6,7 +6,7 @@ import com.vxgzh.maoxiandao.bean.BaiduImageSegtResult;
 import com.vxgzh.maoxiandao.bean.WjmUser;
 import com.vxgzh.maoxiandao.mapper.WjmUserMapper;
 import com.vxgzh.maoxiandao.service.BaiduAccessService;
-import com.vxgzh.maoxiandao.service.UserService;
+import com.vxgzh.maoxiandao.service.WjmUserService;
 import com.vxgzh.maoxiandao.utils.BaiduAccessTokenUtil;
 import com.vxgzh.maoxiandao.utils.HttpUtil;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,7 +30,7 @@ import java.util.stream.Collectors;
  * @Description:
  */
 @Service
-public class UserServiceImpl implements UserService {
+public class WjmUserServiceImpl implements WjmUserService {
 
 
     @Autowired

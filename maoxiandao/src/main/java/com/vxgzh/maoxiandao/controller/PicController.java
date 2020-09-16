@@ -5,7 +5,7 @@ import com.vxgzh.maoxiandao.bean.BaiduAccess;
 import com.vxgzh.maoxiandao.bean.BaiduCard;
 import com.vxgzh.maoxiandao.common.VxUrl;
 import com.vxgzh.maoxiandao.service.BaiduAccessService;
-import com.vxgzh.maoxiandao.service.UserService;
+import com.vxgzh.maoxiandao.service.WjmUserService;
 import com.vxgzh.maoxiandao.utils.HttpUtil;
 import com.vxgzh.maoxiandao.utils.MessageUtil;
 import org.apache.commons.io.FileUtils;
@@ -41,7 +41,7 @@ public class PicController {
     private static final Logger logger = LoggerFactory.getLogger(PicController.class);
 
     @Autowired
-    private UserService userService;
+    private WjmUserService wjmUserService;
     @Autowired
     private BaiduAccessService baiduAccessService;
 
@@ -67,7 +67,7 @@ public class PicController {
         }
         String userId = null;
         if (!StringUtils.isEmpty(key)) {
-            userId = userService.uploadTuPian(key);
+            userId = wjmUserService.uploadTuPian(key);
             if (userId == null) {
                 return "No User!";
             }
@@ -124,7 +124,7 @@ public class PicController {
             return "userKey Is Null!";
         }
 
-        String code = userService.getCodeByuuid(userKey);
+        String code = wjmUserService.getCodeByuuid(userKey);
         if (code == null || code.length() <= 0) {
             return null;
         }
@@ -138,7 +138,7 @@ public class PicController {
             content = content.replace("CODE",code)
                     .replace("REMAIN","" + baiduAccess.getRemain())
                     .replace("COUNT","" + baiduAccess.getCount());
-            MessageUtil.sendTextMsg(userService.getUserByUuid(key), content);
+            MessageUtil.sendTextMsg(wjmUserService.getUserByUuid(key), content);
         }
 
         return code;
@@ -167,7 +167,7 @@ public class PicController {
         content = content.replace("REMAIN","" + baiduAccess.getRemain())
                 .replace("COUNT","" + baiduAccess.getCount());
         // 查询用户
-        String userName = userService.getUserByUuid(userKey);
+        String userName = wjmUserService.getUserByUuid(userKey);
         // 通知用户结果
         MessageUtil.sendTextMsg(userName, content);
         return "success";
@@ -194,7 +194,7 @@ public class PicController {
         }
         String userId = null;
         if (!StringUtils.isEmpty(key)) {
-            userId = userService.uploadTuPian(key);
+            userId = wjmUserService.uploadTuPian(key);
             if (userId == null) {
                 return "No User!";
             }
@@ -204,7 +204,7 @@ public class PicController {
         }
 
         logger.info("开始识别");
-        String code = userService.imageSegt(file);
+        String code = wjmUserService.imageSegt(file);
         baiduAccessService.imageSegtUpdateAccess(key);
         logger.info("完成识别");
         if ("1".equals(flag)) {
@@ -218,7 +218,7 @@ public class PicController {
             content = content.replace("CODE",code)
                     .replace("REMAIN","" + baiduAccess.getRemain())
                     .replace("COUNT","" + baiduAccess.getCount());
-            MessageUtil.sendTextMsg(userService.getUserByUuid(key), content);
+            MessageUtil.sendTextMsg(wjmUserService.getUserByUuid(key), content);
         }
 
         return code;
@@ -251,7 +251,7 @@ public class PicController {
 
             content = content.replace("REMAIN","" + baiduAccess.getRemain())
                     .replace("COUNT","" + baiduAccess.getCount());
-            MessageUtil.sendTextMsg(userService.getUserByUuid(key), content);
+            MessageUtil.sendTextMsg(wjmUserService.getUserByUuid(key), content);
         }
 
         return "access success! " + key + ":count：" + baiduAccess.getCount();
@@ -278,7 +278,7 @@ public class PicController {
             content = content.replace("REMAIN","" + baiduAccess.getRemain())
                     .replace("NUMBER","" + number)
                     .replace("COUNT","" + baiduAccess.getCount());
-            MessageUtil.sendTextMsg(userService.getUserByUuid(key), content);
+            MessageUtil.sendTextMsg(wjmUserService.getUserByUuid(key), content);
         }
 
         return "add success! key:remain=" + baiduAccess.getRemain();
@@ -299,13 +299,15 @@ public class PicController {
 
         BaiduAccess baiduAccess = baiduAccessService.getBaiduAccessByUuid(key);
         baiduAccess = baiduAccess == null ? new BaiduAccess() : baiduAccess;
-        if (flag == 1) {
+        if (flag == null) {
+            return new Gson().toJson(baiduAccess);
+        } else if (flag == 1) {
             return "" + baiduAccess.getCount();
         } else if (flag == 2){
             return "" + baiduAccess.getRemain();
         }
-
         return new Gson().toJson(baiduAccess);
+
     }
 
     /**
@@ -327,7 +329,7 @@ public class PicController {
 
             content = content.replace("REMAIN","" + baiduAccess.getRemain())
                     .replace("COUNT","" + baiduAccess.getCount());
-            MessageUtil.sendTextMsg(userService.getUserByUuid(key), content);
+            MessageUtil.sendTextMsg(wjmUserService.getUserByUuid(key), content);
         }
 
         return i > 0 ? "success" : "No Key! key=" + key;

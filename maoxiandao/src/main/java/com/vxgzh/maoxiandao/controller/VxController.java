@@ -1,10 +1,11 @@
 package com.vxgzh.maoxiandao.controller;
 
+import com.google.gson.Gson;
 import com.vxgzh.maoxiandao.bean.WjmUser;
 import com.vxgzh.maoxiandao.bean.xml.InMsgEntity;
 import com.vxgzh.maoxiandao.bean.xml.OutMsgEntity;
 import com.vxgzh.maoxiandao.common.Account;
-import com.vxgzh.maoxiandao.service.UserService;
+import com.vxgzh.maoxiandao.service.WjmUserService;
 import com.vxgzh.maoxiandao.utils.VxAccessTokenUtil;
 import com.vxgzh.maoxiandao.utils.MessageUtil;
 import com.vxgzh.maoxiandao.utils.SignUtil;
@@ -24,10 +25,10 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("vx")
 public class VxController {
 
-    private static Logger log = LoggerFactory.getLogger(VxController.class);
+    private static final Logger log = LoggerFactory.getLogger(VxController.class);
 
     @Autowired
-    UserService userService;
+    WjmUserService wjmUserService;
 
     @GetMapping()
     public String verify(String signature,String timestamp,String nonce,String echostr){
@@ -43,6 +44,7 @@ public class VxController {
 
     @PostMapping()
     public String getMessage(@RequestBody InMsgEntity inMsgEntity){
+        log.info("微信消息：inMsgEntity={}",new Gson().toJson(inMsgEntity));
         // 微信账号（openID）
         String openId = inMsgEntity.getFromUserName();
         // 返回体
@@ -57,7 +59,7 @@ public class VxController {
             String key = inMsgEntity.getContent().substring(1);
 
             // todo 绑定到数据库
-            String uuid = userService.addUser(openId);
+            String uuid = wjmUserService.addUser(openId);
 
             // 返回成功信息
             outMsgEntity.setContent("注册成功，您的密钥为："+uuid + "\n验证码：请用wasd表示箭头方向");
@@ -66,7 +68,7 @@ public class VxController {
         }
 
         // 查询用户是否存在
-        WjmUser wjmUser = userService.getUserByName(openId);
+        WjmUser wjmUser = wjmUserService.getUserByName(openId);
         if (wjmUser == null) {
             outMsgEntity.setContent("您未注册，请发送@字符进行注册");
             return outMsgEntity.getTextXml();
@@ -78,7 +80,7 @@ public class VxController {
             String code = inMsgEntity.getContent();
 
             // todo 把这最新的验证码保存到数据库
-            userService.addCode(openId,code);
+            wjmUserService.addCode(openId,code);
 
             // 返回成功信息
             return "success";

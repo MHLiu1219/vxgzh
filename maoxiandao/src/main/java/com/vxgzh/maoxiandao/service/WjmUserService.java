@@ -3,7 +3,7 @@ package com.vxgzh.maoxiandao.service;
 import com.vxgzh.maoxiandao.bean.WjmUser;
 import org.springframework.web.multipart.MultipartFile;
 
-public interface UserService {
+public interface WjmUserService {
 
 
     //根据图片名获取用户微信唯一对应值

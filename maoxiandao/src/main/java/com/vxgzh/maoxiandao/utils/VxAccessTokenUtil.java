@@ -22,9 +22,9 @@ import java.util.concurrent.locks.ReentrantLock;
  */
 public class VxAccessTokenUtil {
     public static final String url= VxUrl.BASE_SUPPORT_GET_ACCESS_TOKEN_URL;
-    private static Map<String,AccessToken> map = new ConcurrentHashMap<>();
+    private static final Map<String,AccessToken> map = new ConcurrentHashMap<>();
     private static Date updateTime = new Date();
-    private static Lock lock = new ReentrantLock();
+    private static final Lock lock = new ReentrantLock();
     private static final Logger log = LoggerFactory.getLogger(VxAccessTokenUtil.class);
 
     static {
@@ -38,11 +38,12 @@ public class VxAccessTokenUtil {
      * @return
      */
     public static AccessToken getAccessToken(String APPID,String APPSECRET) {
+        log.info("修改前url:{}",url);
         String urlStr = url.replaceAll("APPID", APPID).replaceAll("APPSECRET", APPSECRET);
+        log.info("修改后url:{}",urlStr);
         String json = HttpUtil.httpsGet(urlStr);
         Gson gson = new Gson();
-        AccessToken accessToken = gson.fromJson(json, AccessToken.class);
-        return accessToken;
+        return gson.fromJson(json, AccessToken.class);
     }
 
     /**
@@ -50,14 +51,14 @@ public class VxAccessTokenUtil {
      * @return
      */
     public static String getAccessToken(){
+        log.info("acceess_token剩余时间：{}", updateTime.getTime());
         check();
         AccessToken accessToken = map.get("accessToken");
         if (accessToken == null) {
             log.error("access_token is null");
             return null;
         }
-        String access_token = accessToken.getAccess_token();
-        return access_token;
+        return accessToken.getAccess_token();
     }
 
     /**
