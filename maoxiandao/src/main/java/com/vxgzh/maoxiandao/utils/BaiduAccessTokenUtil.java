@@ -3,6 +3,7 @@ package com.vxgzh.maoxiandao.utils;
 import com.google.gson.Gson;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.util.StringUtils;
 
 import java.util.Date;
@@ -50,7 +51,7 @@ public class BaiduAccessTokenUtil {
         if (obj != null) {
             String s = obj.toString();
             String expires_in = s.substring(0, s.indexOf("."));
-            if (!StringUtils.isEmpty(expires_in) && (Long.valueOf(expires_in).longValue() - 3600) * 1000 > l) {
+            if (!StringUtils.isEmpty(expires_in) && (Long.parseLong(expires_in) - 3600) * 1000 > l) {
                 return;
             }
         }
@@ -75,6 +76,11 @@ public class BaiduAccessTokenUtil {
         post("client_credentials","XuSXHOmxQv01TRVNE80hqECI","nd05wkNRgVSkSyjyZFZQrlbXDN4h1I7v");
     }
 
+    @Scheduled(cron = "0 0 0 * * ?")
+    public void scheduled(){
+        log.info("定时刷新百度access-token");
+        flushAccessToken();
+    }
 }
 
 

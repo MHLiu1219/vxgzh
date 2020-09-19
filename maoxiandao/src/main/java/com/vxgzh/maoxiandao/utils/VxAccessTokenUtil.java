@@ -97,7 +97,7 @@ public class VxAccessTokenUtil {
 
     @Scheduled(cron = "0 0 * * * ?")
     public void scheduled(){
-        log.info("定时刷新access-token");
+        log.info("定时刷新微信access-token");
         flushAccessToken();
     }
 }
