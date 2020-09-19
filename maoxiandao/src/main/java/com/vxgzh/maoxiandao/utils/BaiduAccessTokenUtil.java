@@ -61,7 +61,7 @@ public class BaiduAccessTokenUtil {
         // 重新刷新
         if (lock.tryLock()) {
             try {
-                log.info("开始刷新token");
+                log.info("开始刷新百度access-token");
                 flushAccessToken();
             } finally {
                 lock.unlock();
@@ -76,11 +76,7 @@ public class BaiduAccessTokenUtil {
         post("client_credentials","XuSXHOmxQv01TRVNE80hqECI","nd05wkNRgVSkSyjyZFZQrlbXDN4h1I7v");
     }
 
-    @Scheduled(cron = "0 0 0 * * ?")
-    public void scheduled(){
-        log.info("定时刷新百度access-token");
-        flushAccessToken();
-    }
+
 }
 
 
