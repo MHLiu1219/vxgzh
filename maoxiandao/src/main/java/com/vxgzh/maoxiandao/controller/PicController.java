@@ -107,8 +107,14 @@ public class PicController {
             return resp;
         }
 
-        MessageUtil.sendImageMsg(userId, mediaId.toString());
-        return "success";
+        resp = MessageUtil.sendImageMsg(userId, mediaId.toString());
+        map = gson.fromJson(resp, HashMap.class);
+        Integer errcode = (Integer) map.get("errcode");
+        if (errcode == 0) {
+            return "success";
+        }
+        return errcode.toString();
+
     }
 
     /**

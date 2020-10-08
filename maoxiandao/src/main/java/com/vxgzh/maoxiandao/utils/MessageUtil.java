@@ -25,21 +25,22 @@ public class MessageUtil {
      * 客服-发送消息
      * @param json
      */
-    public static void SendMsg(String json){
+    public static String SendMsg(String json){
         //发送消息的url
         String url= VxUrl.SEND_MESSAGE_CUSTOMER_SERVICE_URL;
         String accessToken = VxAccessTokenUtil.getAccessToken();
         url = url.replaceAll("ACCESS_TOKEN", accessToken);
         String httpsRequest = HttpUtil.httpsPost(url, json);
         log.info(httpsRequest);
+        return httpsRequest;
     }
 
     /**
      * 客服-发送消息
      * @param src
      */
-    public static void SendMsg(Object src){
-        SendMsg(new Gson().toJson(src));
+    public static String SendMsg(Object src){
+        return SendMsg(new Gson().toJson(src));
     }
 
 
@@ -48,11 +49,11 @@ public class MessageUtil {
      * @param userNameOrOpenId 用户
      * @param content 文本
      */
-    public static void sendTextMsg(String userNameOrOpenId,String content){
+    public static String sendTextMsg(String userNameOrOpenId,String content){
         TextMsg textMsg = new TextMsg();
         textMsg.setTouser(userNameOrOpenId);
         textMsg.setText(new Text(content));
-        SendMsg(textMsg);
+        return SendMsg(textMsg);
     }
 
     /**
@@ -60,10 +61,10 @@ public class MessageUtil {
      * @param userNameOrOpenId 用户
      * @param media_id 图片的媒体id
      */
-    public static void sendImageMsg(String userNameOrOpenId,String media_id){
+    public static String sendImageMsg(String userNameOrOpenId,String media_id){
         ImageMsg imageMsg = new ImageMsg();
         imageMsg.setTouser(userNameOrOpenId);
         imageMsg.setImage(new Image(media_id));
-        SendMsg(imageMsg);
+        return SendMsg(imageMsg);
     }
 }
